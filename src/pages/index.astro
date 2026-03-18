@@ -1,292 +1,253 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ISIM - Instituto de la Salud Integral de la Mujer</title>
+---
+/* PalomaPOS Merchant Onboarding para Astro 
+   Layout final con Tablas en la selección de dispositivos.
+*/
+---
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<div class="form-container">
+  <h2 class="form-title">PalomaPOS Merchant Onboarding</h2>
+  
+  <form id="onboardingForm" enctype="multipart/form-data">
+    <div class="section">
+      <span class="section-header">01. Business Profile</span>
+      <div class="grid">
+        <div class="field-group full-width"><label>Business Name</label><input type="text" name="bizName" /></div>
+        <div class="field-group"><label>MID (Merchant ID)</label><input type="text" name="mid" /></div>
+        <div class="field-group"><label>Owner Name</label><input type="text" name="ownerName" /></div>
+        <div class="field-group"><label>Phone</label><input type="tel" name="phone" /></div>
+        <div class="field-group"><label>Tax Rate (%)</label><input type="text" name="taxRate" /></div>
+      </div>
+      <div class="field-group"><label>Shipping Address</label><input type="text" name="shipping" /></div>
+    </div>
+
+    <div class="section">
+      <span class="section-header">02. Tip Configuration</span>
+      <div class="grid">
+        <div class="field-group full-width">
+          <label>Tip Option</label>
+          <div class="binary-choice">
+            <label class="check-item"><input type="checkbox" name="tip_no" value="no" /> NO TIPS</label>
+            <label class="check-item"><input type="checkbox" name="tip_custom" value="custom" /> CUSTOM TIP</label>
+          </div>
+        </div>
+      </div>
+      <div id="tip-inputs-container" class="grid" style="margin-top: 10px;">
+        <div class="field-group"><label>Tip Option 1</label><input type="text" name="tip_1" placeholder="e.g. 15%" /></div>
+        <div class="field-group"><label>Tip Option 2</label><input type="text" name="tip_2" placeholder="e.g. 18%" /></div>
+        <div class="field-group"><label>Tip Option 3</label><input type="text" name="tip_3" placeholder="e.g. 20%" /></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <span class="section-header">03. Device Specifications</span>
+      <div class="counter-box">
+        <p style="font-weight: 800; font-size: 11px; margin: 0;">TOTAL DEVICES:</p>
+        <button type="button" class="counter-btn" id="minus-btn">-</button>
+        <div class="counter-value" id="deviceCountLabel">0</div>
+        <button type="button" class="counter-btn" id="plus-btn">+</button>
+      </div>
+      <div id="deviceContainer"></div>
+    </div>
+
+    <div class="section">
+      <span class="section-header">04. Menu Configuration</span>
+      <div class="field-group">
+        <label>Upload Menu (PDF, Excel, PNG, JPG, JPEG)</label>
+        <input type="file" name="menu_file" accept=".pdf, .xlsx, .xls, .png, .jpg, .jpeg" class="file-input" />
+      </div>
+      <div class="field-group"><label>Menu Link (Alternative)</label><input type="text" name="menu_link" /></div>
+    </div>
+
+    <div class="section">
+      <span class="section-header">05. Cash Discount Program</span>
+      <div class="grid">
+        <div class="field-group">
+          <label>Enable Program</label>
+          <div class="binary-choice">
+            <label class="check-item"><input type="checkbox" name="cdp" value="yes" class="exclusive cdp-toggle" /> YES</label>
+            <label class="check-item"><input type="checkbox" name="cdp" value="no" class="exclusive cdp-toggle" /> NO</label>
+          </div>
+        </div>
+        <div class="field-group" id="cdp-rate-box" style="opacity: 0.4;">
+            <label>Discount Rate (%)</label>
+            <input type="text" name="cdp_rate" disabled />
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <span class="section-header">06. Funding Options</span>
+      <div class="grid">
+        <div class="field-group">
+          <label>Instant Funding</label>
+          <div class="binary-choice">
+            <label class="check-item"><input type="checkbox" name="fund_instant" value="yes" class="exclusive" /> YES</label>
+            <label class="check-item"><input type="checkbox" name="fund_instant" value="no" class="exclusive" /> NO</label>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Same Day Funding</label>
+          <div class="binary-choice">
+            <label class="check-item"><input type="checkbox" name="fund_same" value="yes" class="exclusive" /> YES</label>
+            <label class="check-item"><input type="checkbox" name="fund_same" value="no" class="exclusive" /> NO</label>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Next Day Funding</label>
+          <div class="binary-choice">
+            <label class="check-item"><input type="checkbox" name="fund_next" value="yes" class="exclusive" /> YES</label>
+            <label class="check-item"><input type="checkbox" name="fund_next" value="no" class="exclusive" /> NO</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <span class="section-header">07. Delivery & Menu Logistics</span>
+      {['ue_active', 'dd_active', 'gh_active'].map((platform) => (
+        <div class="delivery-row">
+          <label>{platform.replace('_active', '').replace('ue', 'Uber Eats').replace('dd', 'DoorDash').replace('gh', 'GrubHub').toUpperCase()}</label>
+          <div class="binary-choice">
+            <label class="check-item"><input type="checkbox" name={platform} value="yes" class="exclusive platform-toggle" /> YES</label>
+            <label class="check-item"><input type="checkbox" name={platform} value="no" class="exclusive platform-toggle" /> NO</label>
+          </div>
+          <div class="field-group time-field" style="opacity: 0.4;">
+            <label>Conf. Time</label><input type="time" disabled />
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <button type="button" class="submit-btn" id="print-btn">PRINT / SAVE AS PDF</button>
+  </form>
+</div>
 
 <style>
+  :root { --brand-color: #4ccfff; --bg: #f4f4f9; --card: #ffffff; }
+  .form-container { background: var(--card); max-width: 850px; margin: 20px auto; padding: 30px; border-radius: 12px; font-family: 'Inter', sans-serif; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+  .form-title { text-align: center; font-weight: 900; text-transform: uppercase; border-bottom: 4px solid var(--brand-color); padding-bottom: 15px; color: var(--brand-color); margin-bottom: 40px; }
+  .section { margin-bottom: 35px; border: 2px solid #eee; padding: 25px 20px; border-radius: 8px; position: relative; }
+  .section-header { font-weight: 900; font-size: 13px; text-transform: uppercase; color: var(--brand-color); background: var(--card); position: absolute; top: -10px; left: 15px; padding: 0 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+  .full-width { grid-column: 1 / -1; }
+  .field-group { margin-bottom: 15px; transition: opacity 0.3s; }
+  label { display: block; font-weight: 800; font-size: 11px; margin-bottom: 5px; text-transform: uppercase; color: #444; }
+  input, select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+  input:disabled { background-color: #f5f5f5; cursor: not-allowed; }
+  
+  .device-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: #fafafa; border-radius: 8px; overflow: hidden; border: 1px solid #ddd; border-left: 5px solid var(--brand-color); }
+  .device-table td { padding: 12px; vertical-align: middle; border-bottom: 1px solid #eee; }
+  .device-table tr:last-child td { border-bottom: none; }
+  .label-cell { width: 30%; font-weight: 800; font-size: 11px; text-transform: uppercase; color: #333; }
 
-:root{
-    --navy:#0b1c2d;
-    --navy-light:#132b45;
-    --green-light:#4ade80;
-    --green-glow:#22c55e;
-    --glass: rgba(255,255,255,0.06);
-    --text-soft:#cbd5e1;
-}
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins', sans-serif;
-}
-
-body{
-    background: radial-gradient(circle at top left, #132b45, #0b1c2d 60%);
-    color:white;
-    min-height:100vh;
-}
-
-/* HEADER */
-.header{
-    height:80px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 60px;
-    backdrop-filter: blur(12px);
-    background: rgba(11,28,45,0.6);
-    border-bottom:1px solid rgba(255,255,255,0.08);
-}
-
-.logo{
-    font-size:26px;
-    font-weight:700;
-    letter-spacing:2px;
-    color:var(--green-light);
-}
-
-.logo span{
-    color:white;
-    font-weight:400;
-    font-size:14px;
-    display:block;
-    letter-spacing:1px;
-}
-
-.user-area{
-    font-size:14px;
-    color:var(--text-soft);
-}
-
-/* LAYOUT */
-.layout{
-    display:flex;
-}
-
-/* SIDEBAR */
-.sidebar{
-    width:270px;
-    min-height:calc(100vh - 80px);
-    background: linear-gradient(180deg, var(--navy-light), var(--navy));
-    padding-top:40px;
-    border-right:1px solid rgba(255,255,255,0.05);
-}
-
-.sidebar a{
-    display:block;
-    padding:16px 35px;
-    color:var(--text-soft);
-    text-decoration:none;
-    font-size:15px;
-    transition:0.4s;
-    position:relative;
-}
-
-.sidebar a:hover{
-    color:white;
-    background:rgba(74,222,128,0.08);
-}
-
-.sidebar a:hover::before{
-    content:"";
-    position:absolute;
-    left:0;
-    top:0;
-    height:100%;
-    width:4px;
-    background:var(--green-light);
-    box-shadow:0 0 12px var(--green-glow);
-}
-
-/* MAIN */
-.main{
-    flex:1;
-    padding:50px 60px;
-}
-
-/* HERO */
-.hero{
-    margin-bottom:50px;
-}
-
-.hero h1{
-    font-size:34px;
-    font-weight:600;
-    margin-bottom:10px;
-}
-
-.hero p{
-    color:var(--text-soft);
-    font-size:15px;
-}
-
-/* DASHBOARD CARDS */
-.cards{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:30px;
-}
-
-.card{
-    background:var(--glass);
-    border:1px solid rgba(255,255,255,0.08);
-    padding:35px;
-    border-radius:20px;
-    backdrop-filter:blur(14px);
-    transition:0.4s;
-}
-
-.card:hover{
-    transform:translateY(-8px);
-    border-color:var(--green-light);
-    box-shadow:0 0 30px rgba(34,197,94,0.2);
-}
-
-.card h3{
-    font-size:18px;
-    margin-bottom:15px;
-}
-
-.card p{
-    font-size:14px;
-    color:var(--text-soft);
-    margin-bottom:20px;
-}
-
-.card button{
-    background:linear-gradient(90deg,var(--green-light),var(--green-glow));
-    border:none;
-    padding:12px 22px;
-    border-radius:40px;
-    font-size:13px;
-    font-weight:500;
-    cursor:pointer;
-    transition:0.4s;
-}
-
-.card button:hover{
-    box-shadow:0 0 20px var(--green-glow);
-}
-
-/* METRICS STRIP */
-.metrics{
-    display:flex;
-    gap:40px;
-    margin-top:60px;
-}
-
-.metric-box{
-    flex:1;
-    background:rgba(255,255,255,0.05);
-    padding:25px;
-    border-radius:18px;
-    text-align:center;
-}
-
-.metric-box h2{
-    font-size:28px;
-    color:var(--green-light);
-}
-
-.metric-box span{
-    font-size:13px;
-    color:var(--text-soft);
-}
-
-/* FOOTER */
-.footer{
-    margin-top:60px;
-    text-align:center;
-    font-size:12px;
-    color:var(--text-soft);
-    opacity:0.7;
-}
-
+  .counter-box { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 10px; background: #f9f9f9; border-radius: 8px; width: fit-content; }
+  .counter-btn { width: 35px; height: 35px; border-radius: 50%; border: none; background: var(--brand-color); color: #fff; cursor: pointer; font-size: 20px; font-weight: bold; }
+  .binary-choice { display: flex; gap: 10px; background: #fff; padding: 8px; border: 1px solid #eee; border-radius: 6px; width: fit-content; }
+  .check-item { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .delivery-row { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 15px; align-items: end; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+  .submit-btn { width: 100%; padding: 18px; background: var(--brand-color); color: #fff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+  @media print { .counter-box, .submit-btn, .file-input { display: none; } }
+  @media (max-width: 600px) { .delivery-row { grid-template-columns: 1fr; } .label-cell { width: 40%; } }
 </style>
-</head>
 
-<body>
+<script>
+  let deviceCount = 0;
+  const container = document.getElementById('deviceContainer');
+  const label = document.getElementById('deviceCountLabel');
+  const form = document.getElementById('onboardingForm') as HTMLFormElement;
 
-<div class="header">
-    <div class="logo">
-        ISIM
-        <span>Instituto de la Salud Integral de la Mujer</span>
-    </div>
-    <div class="user-area">
-        Panel Ejecutivo • Acceso Seguro
-    </div>
-</div>
+  document.getElementById('plus-btn')?.addEventListener('click', () => updateDevices(1));
+  document.getElementById('minus-btn')?.addEventListener('click', () => updateDevices(-1));
+  document.getElementById('print-btn')?.addEventListener('click', () => window.print());
 
-<div class="layout">
+  function updateDevices(val: number) {
+    deviceCount = Math.max(0, deviceCount + val);
+    if (label) label.innerText = deviceCount.toString();
+    renderCards();
+  }
 
-    <div class="sidebar">
-        <a href="#">Panel General</a>
-        <a href="#">Exámenes Clínicos</a>
-        <a href="#">Pacientes</a>
-        <a href="#">Resultados</a>
-        <a href="#">Reportes Ejecutivos</a>
-        <a href="#">Configuración</a>
-    </div>
+  function renderCards() {
+    if(!container) return;
+    const current = container.querySelectorAll('.device-table').length;
+    const models = ["Sunmi p3 mix" , "valor vp800", "valor vp550e" , "volcora printer", "cashdrawer"];
+    
+    if (deviceCount > current) {
+      for (let i = current + 1; i <= deviceCount; i++) {
+        const table = document.createElement('table');
+        table.className = 'device-table';
+        table.id = `dev_table_${i}`;
+        table.innerHTML = `
+          <tbody>
+            <tr>
+              <td class="label-cell">Device #${i} Model</td>
+              <td>
+                <select name="model_${i}">
+                  <option disabled selected>Select hardware...</option>
+                  ${models.map(m => `<option value="${m}">${m}</option>`).join('')}
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="label-cell">Autobatch</td>
+              <td>
+                <div class="binary-choice">
+                  <label class="check-item"><input type="checkbox" name="db_${i}" value="yes" class="dev-toggle"> YES</label>
+                  <label class="check-item"><input type="checkbox" name="db_${i}" value="no" class="dev-toggle"> NO</label>
+                </div>
+              </td>
+            </tr>
+            <tr class="time-row" id="tbox_${i}" style="opacity: 0.4;">
+              <td class="label-cell">Batch Time</td>
+              <td><input type="time" disabled /></td>
+            </tr>
+          </tbody>
+          <hr>
+        `;
+        container.appendChild(table);
+      }
+    } else {
+      while (container.children.length > deviceCount) {
+        container.removeChild(container.lastChild!);
+      }
+    }
+  }
 
-    <div class="main">
+  form?.addEventListener('change', (e) => {
+    const target = e.target as HTMLInputElement;
+    if (target.type !== 'checkbox') return;
 
-        <div class="hero">
-            <h1>Centro Médico Premium Internacional</h1>
-            <p>Gestión clínica avanzada con estándares hospitalarios de clase mundial.</p>
-        </div>
+    // Lógica de exclusividad
+    if (target.classList.contains('exclusive') || target.name.startsWith('db_') || target.name.startsWith('fund_') || target.name.startsWith('ue_') || target.name.startsWith('dd_') || target.name.startsWith('gh_')) {
+      const group = form.querySelectorAll(`input[name="${target.name}"]`) as NodeListOf<HTMLInputElement>;
+      group.forEach(cb => { if (cb !== target) cb.checked = false; });
+    }
 
-        <div class="cards">
-            <div class="card">
-                <h3>Gestión de Exámenes</h3>
-                <p>Administración y seguimiento clínico digital avanzado.</p>
-                <button>Acceder</button>
-            </div>
+    const isYes = target.value === 'yes' && target.checked;
 
-            <div class="card">
-                <h3>Pacientes Activas</h3>
-                <p>Historial clínico centralizado con seguridad médica.</p>
-                <button>Ver Información</button>
-            </div>
+    // Toggle para Cash Discount
+    if (target.classList.contains('cdp-toggle')) {
+      const rateBox = document.getElementById('cdp-rate-box');
+      const input = rateBox?.querySelector('input');
+      if (input) input.disabled = !isYes;
+      if (rateBox) rateBox.style.opacity = isYes ? "1" : "0.4";
+    }
 
-            <div class="card">
-                <h3>Resultados Digitales</h3>
-                <p>Entrega segura con generación de enlaces protegidos.</p>
-                <button>Consultar</button>
-            </div>
+    // Toggle para Dispositivos Dinámicos (Tablas)
+    if (target.classList.contains('dev-toggle')) {
+      const id = target.name.split('_')[1];
+      const timeRow = document.getElementById(`tbox_${id}`);
+      const input = timeRow?.querySelector('input');
+      if (input) input.disabled = !isYes;
+      if (timeRow) timeRow.style.opacity = isYes ? "1" : "0.4";
+    }
 
-            <div class="card">
-                <h3>Indicadores Clínicos</h3>
-                <p>Estadísticas médicas y análisis institucional.</p>
-                <button>Visualizar</button>
-            </div>
-        </div>
-
-        <div class="metrics">
-            <div class="metric-box">
-                <h2>1,248</h2>
-                <span>Exámenes Procesados</span>
-            </div>
-            <div class="metric-box">
-                <h2>312</h2>
-                <span>Pacientes Registradas</span>
-            </div>
-            <div class="metric-box">
-                <h2>98%</h2>
-                <span>Satisfacción Clínica</span>
-            </div>
-        </div>
-
-        <div class="footer">
-            © 2026 ISIM • Instituto de la Salud Integral de la Mujer • Plataforma Médica Internacional
-        </div>
-
-    </div>
-</div>
-
-</body>
-</html>
+    // Toggle para Delivery
+    if (target.classList.contains('platform-toggle')) {
+      const row = target.closest('.delivery-row');
+      const timeField = row?.querySelector('.time-field') as HTMLElement;
+      const input = timeField?.querySelector('input');
+      if (input) input.disabled = !isYes;
+      if (timeField) timeField.style.opacity = isYes ? "1" : "0.4";
+    }
+  });
+</script>
